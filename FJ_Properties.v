@@ -122,7 +122,7 @@ Module Properties (H: Hyps).
         assert ((t, E0, e) = (t0, E2, b)) by (eapply method_fun; eauto).
         subst injections.
         destruct method_implies_typing with (1:=H8) as (t',H8a,H8b).
-        eapply term_substitutivity; (try simpl; eauto).
+        eapply term_substitutivity. eauto. simpl. eauto. eauto.
       Case "eval_context".
         eapply preservation_over_ec; eassumption.
     Qed.
