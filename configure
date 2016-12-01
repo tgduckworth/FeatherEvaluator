@@ -1,0 +1,42 @@
+#!/bin/sh
+
+set -e
+
+coq_makefile -o Makefile -no-install \
+	AdditionalTactics.v Atom.v \
+	Metatheory.v FJ_Definitions.v \
+	FJ_Facts.v FJ_Properties.v \
+	FJ_Example.v
+
+patch -s -p0 <<'END'
+--- Makefile~	2009-08-11 11:31:51.000000000 +0200
++++ Makefile	2009-08-11 11:32:57.000000000 +0200
+@@ -111,17 +111,17 @@
+ 	- mkdir html
+ 	$(COQDOC) -toc -html -g $(COQDOCLIBS) -d html $(VFILES)
+ 
+-all.ps: $(VFILES)
+-	$(COQDOC) -toc -ps $(COQDOCLIBS) -o $@ `$(COQDEP) -sort -suffix .v $(VFILES)`
++all.ps: $(GLOBFILES) $(VFILES)
++	$(COQDOC) -toc -ps $(COQDOCLIBS) -o $@ `$(COQDEP) $(COQLIBS) -sort -suffix .v $(VFILES)`
+ 
+-all-gal.ps: $(VFILES)
+-	$(COQDOC) -toc -ps -g $(COQDOCLIBS) -o $@ `$(COQDEP) -sort -suffix .v $(VFILES)`
++all-gal.ps: $(GLOBFILES) $(VFILES)
++	$(COQDOC) -toc -ps -g $(COQDOCLIBS) -o $@ `$(COQDEP) $(COQLIBS) -sort -suffix .v $(VFILES)`
+ 
+-all.pdf: $(VFILES)
+-	$(COQDOC) -toc -pdf $(COQDOCLIBS) -o $@ `$(COQDEP) -sort -suffix .v $(VFILES)`
++all.pdf: $(GLOBFILES) $(VFILES)
++	$(COQDOC) -toc -pdf $(COQDOCLIBS) -o $@ `$(COQDEP) $(COQLIBS) -sort -suffix .v $(VFILES)`
+ 
+-all-gal.pdf: $(VFILES)
+-	$(COQDOC) -toc -pdf -g $(COQDOCLIBS) -o $@ `$(COQDEP) -sort -suffix .v $(VFILES)`
++all-gal.pdf: $(GLOBFILES) $(VFILES)
++	$(COQDOC) -toc -pdf -g $(COQDOCLIBS) -o $@ `$(COQDEP) $(COQLIBS) -sort -suffix .v $(VFILES)`
+ 
+ 
+ 
+END
+
+echo "Makefile created."
