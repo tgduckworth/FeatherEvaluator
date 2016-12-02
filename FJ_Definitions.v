@@ -173,6 +173,28 @@ Inductive eval : exp -> exp -> Prop :=
     exp_context EE ->
     eval (EE e) (EE e').
 
+Fixpoint feval (e:exp) (ct: ctable) : option exp :=
+  match e with
+  | e_field (e_new C es) f =>
+    match (get C ct) with
+    | Some (_, fs, _) => get f (combine (map fst fs) es)
+    | None => None
+    end   (**R-FIELD**)
+  | e_meth (e_new C es) m ds =>
+    match (get C ct) with
+    | Some (_, _, ms) => 
+      match (get m ms) with
+      | Some (_,en,ex) => (subst_exp ((this,(e_new C es))::(combine (map fst en) ds)) ex)
+      | None => None
+      end
+    | None => None
+    end (**R-INVK**)
+  | e_field e f => (feval e ct)      (**RC-FIELD**)
+  | e_meth e m es => (feval e ct)    (**RC_INVK-RECV**)
+  | e_new c es => Some (e_new c es) 
+  | e_var v => Some (e_var v)
+  end.
+
 Hint Constructors eval.
 (* Help Coq to eapply eval_context rule ("Meta cannot occur in evar body") *)
 Hint Extern 2 (eval (e_field _ ?f) _) => eapply (eval_context (fun e0 => e_field e0 f)).
