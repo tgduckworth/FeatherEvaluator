@@ -30,8 +30,10 @@ Definition cname := atom.
 (** The names [this] and [Object] are predefined. We simply assume that these
     names exist. *)
 
-Parameter this : var.
-Parameter Object : cname.
+(**Parameter this : var.
+Parameter Object : cname.**)
+Definition this : var := 20.
+Definition Object : cname := 21.
 
 (** ** Type and term expressions *)
 
@@ -175,22 +177,22 @@ Inductive eval : exp -> exp -> Prop :=
 
 (** Variable Q: Type. **)
 
-Fixpoint lookup {Q} (x: atom) (E: list (atom * Q)) : option Q :=
+(**Fixpoint lookup {Q} (x: atom) (E: list (atom * Q)) : option Q :=
   match E with
   | nil => None
-  | (y,v)::E => if (Nat.eqb x y) then Some v else get x E
+  | (y,v)::E => if (Nat.eqb x y) then Some v else lookup x E
   end.
-
+**)
 
 Fixpoint feval (e:exp) (ct: ctable) : option exp :=
   match e with
   | e_field (e_new C es) f =>
-    match (lookup C ct) with
-    | Some (_, fs, _) => lookup f (combine (List.map fst fs) es)
+    match (get C ct) with
+    | Some (_, fs, _) => get f (combine (List.map fst fs) es)
     | None => None
     end   (**R-FIELD**)
   | e_meth (e_new C es) m ds =>
-    match (lookup C ct) with
+    match (get C ct) with
     | Some (_, _, ms) => 
       match (get m ms) with
       | Some (_,en,ex) => Some (subst_exp ((this,(e_new C es))::(combine (List.map fst en) ds)) ex)
