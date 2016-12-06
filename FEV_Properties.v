@@ -22,9 +22,11 @@ Proof.
     + simpl in IHe1. remember (get c ct) as ofs. destruct ofs.
       * remember (snd (fst p)) as fs. remember (combine (List.map fst fs) l) as fes.
         apply eval_field with (fs:=fs) (fes:=fes).
-        -- admit.
-        -- admit.
-        -- admit.
+        --  change fs with (nil ++ fs). eapply fields_other.
+            ++  admit.
+            ++  admit.
+        --  admit.
+        --  admit.
       * simpl in H. rewrite <- Heqofs in H. discriminate.
  (*apply eval_field with (fs:=snd (get c ct)) (fes:=combine (List.map fst fs) l).*)
   - admit.
