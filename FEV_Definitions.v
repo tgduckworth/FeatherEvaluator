@@ -3,7 +3,7 @@ Require Import FJ_Definitions.
 
 Fixpoint feval (e:exp) (ct: ctable) : option exp :=
   match e with
-  | e_var v => None (* Some (e_var v) *)
+  | e_var v => None
   | e_field (e_new C es) f =>
     match (get C ct) with
     | Some (_, fs, _) => get f (combine (List.map fst fs) es)
@@ -18,7 +18,7 @@ Fixpoint feval (e:exp) (ct: ctable) : option exp :=
       end
     | None => None
     end (**R-INVK**)
-  | e_new c es => None (* Some (e_new c es) *)
+  | e_new c es => None
   | e_field e f =>
     match (feval e ct) with
     | Some ex => Some (e_field ex f)
