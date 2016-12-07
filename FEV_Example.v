@@ -63,6 +63,8 @@ Eval compute in s3.
 Eval compute in s4.
 Eval compute in s5.
 
+Eval compute in teval myexp3 ct 100.
+
 Definition myexp4 : exp := e_field (e_new Pair ((e_new C nil)::(e_field (e_new Pair ((e_new D nil)::(e_new C nil)::nil)) myFst)::nil) ) mySnd.
 
 (* TODO: example of a single step using an evaluation context. prove example

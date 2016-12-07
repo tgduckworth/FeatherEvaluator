@@ -30,3 +30,13 @@ Fixpoint feval (e:exp) (ct: ctable) : option exp :=
     | None => None
     end    (**RC_INVK-RECV**)
   end.
+
+Fixpoint teval (e:exp) (ct:ctable) (n:nat) : exp :=
+  match n with 
+  |S x =>
+    match feval e ct with
+    | Some e2 => teval e2 ct x 
+    | None => e
+    end
+  |0 => e
+  end.
