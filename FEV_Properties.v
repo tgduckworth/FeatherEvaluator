@@ -10,7 +10,7 @@ Proof.
   - intros. admit.
 Admitted.
 
-Theorem feval_correct:
+Theorem feval_sound:
   forall (e1 e2:exp) (ct:ctable), feval e1 ct = Some e2 -> eval e1 e2.
 Proof.
   intro. induction e1; intros.
