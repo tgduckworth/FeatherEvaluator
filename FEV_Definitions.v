@@ -26,32 +26,42 @@ Fixpoint feval (e:exp) (ct:ctable) : option exp :=
     match (feval e ct) with
     | Some e' => Some (e_meth e' m es) (* RC-INVK-RECV *)
     | None =>
-      match lfeval es ct with
+      match es with
+      | h::t => match feval h ct with
+        | Some ne => Some (e_meth e m (ne::t))
+        | None => let x := 0 in match None(**(feval (e_meth (e_var x) m t) ct)**) with
+            | Some (e_meth e m t2) => Some (e_meth e m (h::t2) )
+            | _ => None
+            end
+        end
+      | nil => None
+      end
+(**
       | Some es' => Some (e_meth e m es') (* RC-INVK-ARG *)
       | None => None (* Method invocation on an expression that isn't an *)
-      end            (* object but cannot be reduced produces nothing *)
+      end            (* object but cannot be reduced produces nothing *) **)
     end
-  | e_new c es =>
+  | e_new c es => None(**
     match lfeval es ct with
     | Some es' => Some (e_new c es') (* RC-NEW-ARG *)
     | None => None (* If an object's argument expressions do not reduce, then *)
-    end            (* the expression as a whole does not reduce *)
+    end            (* the expression as a whole does not reduce *) **)
   | e_var _ => None (* Catch-all for variables, which do not step to anything *)
   end
-
+(**
 with lfeval (es:list exp) (ct:ctable) : option (list exp) :=
   match es with
-  | e::et =>
-    match feval e ct with
+  | e::et =>None
+    (** match feval e ct with
     | Some e' => Some (e'::et) (* Head steps to something *)
-    | None =>
-      match lfeval et ct with
+    | None => None
+      (** match lfeval et ct with
       | Some et' => Some (e::et') (* Tail steps to something *)
       | None => None (* List does not step to anything *)
-      end
-    end
+      end **)
+    end **)
   | nil => None (* Base case: empty list steps to nothing *)
-  end.
+  end**).
 
 Fixpoint teval (e:exp) (ct:ctable) (n:nat) : exp :=
   match n with 
