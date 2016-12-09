@@ -18,22 +18,40 @@ Fixpoint fexp2exp (e:fexp) : exp :=
     match fexp2exp e1 with
     | e_new cn al => e_new cn ((fexp2exp e2)::al)
     | e_meth e mn al => e_meth e mn ((fexp2exp e2)::al)
-    | e => e (* This case should never occur; it's malformed *)
+    | e1 => e1 (* This case should never occur; it's malformed *)
+    end
+  end.
+
+Fixpoint decomp (e:fexp) : fexp * list fexp :=
+  match e with
+  | f_apply e1 e2 => (fst (app_decomp e1), e2::(snd (app_decomp e1)))
+  | e => (e, nil)
+  end.
+
+Fixpoint feval (e:fexp) (ct:ctable) : option fexp :=
+  match e with
+  | f_field e f =>
+    match decomp e with
+    | (e, nil) => (* note sure what to do here *)
+    | (e', es) => (* probably a match statement on e' *)
     end
   end.
 
 Fixpoint feval (e:fexp) (ct:ctable) : option fexp :=
   match e with
-  | f_field (f_apply (f_new C) es) f =>
+  | f_field (f_apply (f_new C) al) f =>
     match (get C ct) with
-    | Some (_, fs, _) => get f (combine (List.map fst fs) es) (* R-FIELD *)
+    | Some (_, fs, _) =>
+      match fexp2list al with
+      | Some es => get f (combine (List.map fst fs) es) (* R-FIELD *)
+      | None => None (* Arguments could not be made into a list *)
     | None => None (* Class not found *)
     end
-  | f_apply (f_meth (f_new C) m) ds =>
+  | f_apply (f_meth (f_new C) m) al =>
     match (get C ct) with
     | Some (_, _, ms) =>
       match (get m ms) with
-      | Some (_,en,ex) => Some (subst_exp ((this,(e_new C ds))::(combine (List.map fst en) ds)) ex) (* R-INVK *)
+      | Some (_,en,ex) => Some (subst_exp ((this,(e_new C al))::(combine (List.map fst en) al)) ex) (* R-INVK *)
       | None => None (* Insert case for inheritance here *)
       end
     | None => None (* Class not found *)
@@ -43,18 +61,18 @@ Fixpoint feval (e:fexp) (ct:ctable) : option fexp :=
     | Some e' => Some (f_field e' f) (* RC-FIELD *)
     | None => None (* Field access on an expression that isn't an object *)
     end            (* but cannot be reduced produces nothing *)
-  | f_apply (f_meth e m) ds =>
+  | f_apply (f_meth e m) al =>
     match (feval e ct) with
-    | Some e' => Some (f_apply (f_meth e' m) ds) (* RC-INVK-RECV *)
+    | Some e' => Some (f_apply (f_meth e' m) al) (* RC-INVK-RECV *)
     | None =>
-      match feval ds ct with
-      | Some ds' => Some (f_apply (f_meth e m) ds') (* RC-INVK-ARG *)
+      match feval al ct with
+      | Some al' => Some (f_apply (f_meth e m) al') (* RC-INVK-ARG *)
       | None => None (* Method invocation on an expression that isn't an *)
       end            (* object but cannot be reduced produces nothing *)
     end
-  | f_apply (f_new C) es =>
-    match feval es ct with
-    | Some es' => Some (f_apply (f_new C) es') (* RC-NEW-ARG *)
+  | f_apply (f_new C) al =>
+    match feval al ct with
+    | Some al' => Some (f_apply (f_new C) al') (* RC-NEW-ARG *)
     | None => None (* If an object's argument expressions do not reduce, then *)
     end            (* the expression as a whole does not reduce *)
   | f_var _ => None (* Catch-all for variables, which do not step to anything *)
