@@ -24,7 +24,7 @@ Fixpoint fexp2exp (e:fexp) : exp :=
 
 Fixpoint decomp (e:fexp) : fexp * list fexp :=
   match e with
-  | f_apply e1 e2 => (fst (app_decomp e1), e2::(snd (app_decomp e1)))
+  | f_apply e1 e2 => (fst (decomp e1), e2::(snd (decomp e1)))
   | e => (e, nil)
   end.
 
@@ -32,9 +32,41 @@ Fixpoint feval (e:fexp) (ct:ctable) : option fexp :=
   match e with
   | f_field e f =>
     match decomp e with
-    | (e, nil) => (* note sure what to do here *)
-    | (e', es) => (* probably a match statement on e' *)
+    | (e, nil) => (* Field access on non-apply *)
+      match feval e ct with
+      | Some e' => Some (f_field e' f) (* RC-FIELD *)
+      | None => None (* Field access on a non-apply that doesn't simplify *)
+      end
+    | (e1, fes) => (* Field access on apply *)
+      match e1 with
+      | f_new cn => (* Field access on an instantiation *)
+        match (get cn ct) with
+        | Some (_, fs, _) => get f (combine (List.map fst fs) fes) (* R-FIELD *)
+        | None => None (* Class not found *)
+        end
+      | e1 =>                 (* On anything else we just try to step the *)
+        match feval e ct with (* field subexpression, as above *)
+        | Some e' => Some (f_field e' f) (* RC-FIELD *)
+        | None => None (* The expression being accessed doesn't step *)
+        end
+      end
     end
+  | f_apply e1 e2 => None (*
+    match feval e2 ct with
+    | Some e2' => Some (f_apply e1 e2')
+    | None =>
+      match feval e1 ct with
+      | Some e1' => Some (f_apply e1' e2)
+      | None => None
+      end
+    end *)
+  | f_var _ => None
+  | f_meth e mn =>
+    match feval e ct with
+    | Some e' => Some (f_meth e' mn)
+    | None => None
+    end
+  | f_new cn => None
   end.
 
 Fixpoint feval (e:fexp) (ct:ctable) : option fexp :=
