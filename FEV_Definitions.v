@@ -22,6 +22,18 @@ Fixpoint fexp2exp (e:fexp) : exp :=
     end
   end.
 
+Fixpoint subst_exp (E : benv) (e : exp) {struct e} : exp :=
+    match e with
+    | e_var v =>
+        match get v E with
+        | Some e' => e'
+        | None => e_var v
+        end
+    | e_field e0 f => e_field (subst_exp E e0) f
+    | e_meth e0 m es => e_meth (subst_exp E e0) m (List.map (subst_exp E) es)
+    | e_new C es => e_new C (List.map (subst_exp E) es)
+    end.
+
 Fixpoint decomp (e:fexp) : fexp * list fexp :=
   match e with
   | f_apply e1 e2 => (fst (decomp e1), e2::(snd (decomp e1)))
@@ -30,36 +42,120 @@ Fixpoint decomp (e:fexp) : fexp * list fexp :=
 
 Fixpoint feval (e:fexp) (ct:ctable) : option fexp :=
   match e with
-  | f_field e f =>
+  | f_apply e1 e2 =>
+    match feval e2 ct with
+    | Some e2' => f_apply e1 e2'
+    | None =>
+      match feval e1 ct with
+      | Some e1' => f_apply e1' e2
+      | None =>
+        match decomp e with
+        | (eb, nil) => None (* Shouldn't happen since e is f_apply *)
+        | (eb, ps) =>
+          match eb with
+          | f_meth em mn =>
+            match decomp em with
+            | (em, nil) => None (* Method call on non-object *)
+            | (emb, emps) =>
+              match emb with
+              | f_new cn =>
+                match get cn ct with
+                | Some (_, _, ms) =>
+                  match get m ms with
+                  | Some (_, en, ex) => Some (subst_fexp ((this, em)::(combine (List.map fst en) ps)) ex) (* R-INVK *)
+                  | None => None (* TODO: Case for inheritance *)
+                  end
+                | None => None (* Class not found *)
+                end
+              | emb => None (* Method call on application to non-object *)
+              end
+            end
+          | eb => None (* No other simplifications can be made *)
+          end
+        end
+      end
+    end
+  | e =>
+    match decomp e with
+    | (e, nil) =>
+      match e with
+      | f_field e fn =>
+        match decomp e with
+        | (e1, nil) =>
+          match feval e1 ct with
+          | Some e1' => f_field e1' fn (* RC-FIELD *)
+          | None => None (* Unable to to step subexpression of field access *)
+          end
+        | (e1, ps) =>
+          match e1 with
+          | f_new cn =>
+            match get cn ct with
+            | Some (_, fs, _) => get fn (combine (List.map fst fs) ps) (* R-FIELD *)
+            | None => None (* Class not found *)
+            end
+          | e1 =>
+            match feval e
+          end
+        end
+      | f_meth e mn => None (* TODO *)
+      | f_new cn => None (* TODO *)
+      | f_var v => None (* TODO *)
+      | f_apply e1 e2 => None (* Should not happen by definition of decomp *)
+      end
+    | (e, ps) =>
+      match e with
+      | f_meth em mn => None (* TODO *)
+      | f_new cn => None (* TODO *)
+      | f_field e fn => None (* TODO *)
+      | f_var v => None (* TODO *)
+      | f_apply e1 e2 => None (* Should not happen by definition of decomp *)
+      end
+    end
+  end.
+
+Fixpoint feval (e:fexp) (ct:ctable) : option fexp :=
+  .
+
+Fixpoint feval (e:fexp) (ct:ctable) : option fexp :=
+  match e with
+  | f_field e fn =>
     match decomp e with
     | (e, nil) => (* Field access on non-apply *)
       match feval e ct with
-      | Some e' => Some (f_field e' f) (* RC-FIELD *)
+      | Some e' => Some (f_field e' fn) (* RC-FIELD *)
       | None => None (* Field access on a non-apply that doesn't simplify *)
       end
-    | (e1, fes) => (* Field access on apply *)
-      match e1 with
+    | (eb, fes) => (* Field access on apply *)
+      match eb with
       | f_new cn => (* Field access on an instantiation *)
         match (get cn ct) with
-        | Some (_, fs, _) => get f (combine (List.map fst fs) fes) (* R-FIELD *)
+        | Some (_, fs, _) => get fn (combine (List.map fst fs) fes) (* R-FIELD *)
         | None => None (* Class not found *)
         end
-      | e1 =>                 (* On anything else we just try to step the *)
+      | eb =>                 (* On anything else we just try to step the *)
         match feval e ct with (* field subexpression, as above *)
-        | Some e' => Some (f_field e' f) (* RC-FIELD *)
+        | Some e' => Some (f_field e' fn) (* RC-FIELD *)
         | None => None (* The expression being accessed doesn't step *)
         end
       end
     end
-  | f_apply e1 e2 => None (*
+  | f_apply e1 e2 =>
     match feval e2 ct with
     | Some e2' => Some (f_apply e1 e2')
     | None =>
       match feval e1 ct with
       | Some e1' => Some (f_apply e1' e2)
-      | None => None
+      | None =>
+        match decomp e1 with
+        | (eb, fes) =>
+          match feval eb ct with
+          | Some 
+          |
+          end
+        | (e1, nil) => None
+        end
       end
-    end *)
+    end
   | f_var _ => None
   | f_meth e mn =>
     match feval e ct with
