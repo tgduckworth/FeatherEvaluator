@@ -22,16 +22,19 @@ Fixpoint fexp2exp (e:fexp) : exp :=
     end
   end.
 
-Fixpoint subst_exp (E : benv) (e : exp) {struct e} : exp :=
+Notation fbenv := (list (var * fexp)).
+
+Fixpoint subst_fexp (E : fbenv) (e : fexp) {struct e} : fexp :=
     match e with
-    | e_var v =>
+    | f_var v =>
         match get v E with
         | Some e' => e'
-        | None => e_var v
+        | None => f_var v
         end
-    | e_field e0 f => e_field (subst_exp E e0) f
-    | e_meth e0 m es => e_meth (subst_exp E e0) m (List.map (subst_exp E) es)
-    | e_new C es => e_new C (List.map (subst_exp E) es)
+    | f_field e0 fn => f_field (subst_fexp E e0) fn
+    | f_meth e0 mn => f_meth (subst_fexp E e0) mn
+    | f_new C => f_new C
+    | f_apply e1 e2 => f_apply (subst_fexp E e1) (subst_fexp E e2)
     end.
 
 Fixpoint decomp (e:fexp) : fexp * list fexp :=
@@ -42,10 +45,10 @@ Fixpoint decomp (e:fexp) : fexp * list fexp :=
 
 Fixpoint feval (e:fexp) (ct:ctable) : option fexp :=
   match e with
-  | f_apply e1 e2 =>
-    match feval e2 ct with
-    | Some e2' => f_apply e1 e2'
-    | None =>
+  | f_apply e1 e2 =>             (* If the expression is an application we    *)
+    match feval e2 ct with       (* have to both simplify arguments AND       *)
+    | Some e2' => f_apply e1 e2' (* check for the conditions for method calls *)
+    | None =>                    (* since those can be invoked.               *)
       match feval e1 ct with
       | Some e1' => f_apply e1' e2
       | None =>
@@ -61,7 +64,7 @@ Fixpoint feval (e:fexp) (ct:ctable) : option fexp :=
               | f_new cn =>
                 match get cn ct with
                 | Some (_, _, ms) =>
-                  match get m ms with
+                  match get mn ms with
                   | Some (_, en, ex) => Some (subst_fexp ((this, em)::(combine (List.map fst en) ps)) ex) (* R-INVK *)
                   | None => None (* TODO: Case for inheritance *)
                   end
@@ -93,8 +96,7 @@ Fixpoint feval (e:fexp) (ct:ctable) : option fexp :=
             | Some (_, fs, _) => get fn (combine (List.map fst fs) ps) (* R-FIELD *)
             | None => None (* Class not found *)
             end
-          | e1 =>
-            match feval e
+          | e1 => None (* TODO?*)
           end
         end
       | f_meth e mn => None (* TODO *)
