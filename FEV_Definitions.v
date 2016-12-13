@@ -23,6 +23,8 @@ Fixpoint fexp2exp (e:fexp) : exp :=
   end.
 
 Notation fbenv := (list (var * fexp)).
+Notation fmths := (list (mname * (typ * env * fexp))).
+Notation fctable := (list (cname * (cname * flds * fmths))).
 
 Fixpoint subst_fexp (E : fbenv) (e : fexp) {struct e} : fexp :=
     match e with
@@ -43,14 +45,14 @@ Fixpoint decomp (e:fexp) : fexp * list fexp :=
   | e => (e, nil)
   end.
 
-Fixpoint feval (e:fexp) (ct:ctable) : option fexp :=
+Fixpoint feval (e:fexp) (fct:fctable) : option fexp :=
   match e with
-  | f_apply e1 e2 =>             (* If the expression is an application we    *)
-    match feval e2 ct with       (* have to both simplify arguments AND       *)
-    | Some e2' => f_apply e1 e2' (* check for the conditions for method calls *)
-    | None =>                    (* since those can be invoked.               *)
-      match feval e1 ct with
-      | Some e1' => f_apply e1' e2
+  | f_apply e1 e2 =>                    (* If the expression is an application we    *)
+    match feval e2 fct with             (* have to both simplify arguments AND       *)
+    | Some e2' => Some (f_apply e1 e2') (* check for the conditions for method calls *)
+    | None =>                           (* since those can be invoked.               *)
+      match feval e1 fct with
+      | Some e1' => Some (f_apply e1' e2)
       | None =>
         match decomp e with
         | (eb, nil) => None (* Shouldn't happen since e is f_apply *)
@@ -62,7 +64,7 @@ Fixpoint feval (e:fexp) (ct:ctable) : option fexp :=
             | (emb, emps) =>
               match emb with
               | f_new cn =>
-                match get cn ct with
+                match get cn fct with
                 | Some (_, _, ms) =>
                   match get mn ms with
                   | Some (_, en, ex) => Some (subst_fexp ((this, em)::(combine (List.map fst en) ps)) ex) (* R-INVK *)
@@ -85,14 +87,14 @@ Fixpoint feval (e:fexp) (ct:ctable) : option fexp :=
       | f_field e fn =>
         match decomp e with
         | (e1, nil) =>
-          match feval e1 ct with
-          | Some e1' => f_field e1' fn (* RC-FIELD *)
+          match feval e1 fct with
+          | Some e1' => Some (f_field e1' fn) (* RC-FIELD *)
           | None => None (* Unable to to step subexpression of field access *)
           end
         | (e1, ps) =>
           match e1 with
           | f_new cn =>
-            match get cn ct with
+            match get cn fct with
             | Some (_, fs, _) => get fn (combine (List.map fst fs) ps) (* R-FIELD *)
             | None => None (* Class not found *)
             end
@@ -104,14 +106,7 @@ Fixpoint feval (e:fexp) (ct:ctable) : option fexp :=
       | f_var v => None (* TODO *)
       | f_apply e1 e2 => None (* Should not happen by definition of decomp *)
       end
-    | (e, ps) =>
-      match e with
-      | f_meth em mn => None (* TODO *)
-      | f_new cn => None (* TODO *)
-      | f_field e fn => None (* TODO *)
-      | f_var v => None (* TODO *)
-      | f_apply e1 e2 => None (* Should not happen by definition of decomp *)
-      end
+    | (e, ps) => None (* Shouldn't happen because of the apply case above *)
     end
   end.
 
