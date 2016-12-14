@@ -26,6 +26,26 @@ Notation fbenv := (list (var * fexp)).
 Notation fmths := (list (mname * (typ * env * fexp))).
 Notation fctable := (list (cname * (cname * flds * fmths))).
 
+Fixpoint getrm {A:Type} (x: atom) (E: list (atom * A)) : option (A * (list (atom * A))) :=
+  match E with
+  | nil => None
+  | (y,v)::E => if x == y then Some (v, E) else
+    match getrm x E with
+    | Some (v', E') => Some (v', (y,v)::E')
+    | None => None
+    end
+  end.
+
+Fixpoint fmbody (cn:cname) (mn:mname) (fct:fctable) : option (env * fexp) :=
+  match getrm cn fct with
+  | Some ((pn, _, ms), fctr) =>
+    match get mn ms with
+    | Some (_, en, ex) => Some (en, ex) (* Method found for class *)
+    | None => fmbody pn mn fctr (* Recursive call to find in parent classes *)
+    end
+  | None => None (* Class not found *)
+  end.
+
 Fixpoint subst_fexp (E : fbenv) (e : fexp) {struct e} : fexp :=
     match e with
     | f_var v =>
