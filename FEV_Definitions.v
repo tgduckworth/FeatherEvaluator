@@ -103,11 +103,11 @@ Fixpoint feval (e:fexp) (fct:fctable) : option fexp :=
   | f_var v => None (* TODO *)
   end.
 
-Fixpoint teval (e:exp) (ct:ctable) (n:nat) : exp :=
+Fixpoint teval (e:fexp) (fct:fctable) (n:nat) : fexp :=
   match n with 
   | S x =>
-    match feval e ct with
-    | Some e' => teval e' ct x
+    match feval e fct with
+    | Some e' => teval e' fct x
     | None => e
     end
   | 0 => e

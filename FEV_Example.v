@@ -10,7 +10,22 @@ Definition setFst : atom := 5.
 Definition newFst : atom := 6.
 Definition myFst : atom := 7.
 Definition mySnd : atom := 8.
-Definition ct : ctable := (
+
+Definition ct2 : fctable := (
+    (C,(Object,nil,nil))
+  ::(D,(Object,nil,nil))
+  ::(Pair,(
+      Object,
+      ((myFst, Object) :: (mySnd, Object) :: nil),
+      nil
+    ))
+  :: nil).
+
+Definition myfexp : fexp := f_field (f_apply (f_apply (f_new Pair) (f_new D)) (f_new C)) mySnd.
+
+Eval compute in feval myfexp ct2.
+
+Definition ct : fctable := (
     (C,(Object,nil,nil))
   ::(D,(Object,nil,nil))
   ::(Pair,(
