@@ -87,12 +87,16 @@ Fixpoint feval (e:fexp) (fct:fctable) : option fexp :=
           | Some (_, fs, _) => get fn (combine (List.map fst fs) ps) (* R-FIELD *)
           | None => None (* Class not found *)
           end
-        | eb => None (* TODO?*)
+        | eb =>
+          match feval e fct with
+          | Some e' => Some (f_field e' fn) (* RC-FIELD *)
+          | None => None (* Unable to step subexpression of field access *)
+          end
         end
     | e =>
       match feval e fct with
-      | Some e1' => Some (f_field e1' fn) (* RC-FIELD *)
-      | None => None (* Unable to to step subexpression of field access *)
+      | Some e' => Some (f_field e' fn) (* RC-FIELD *)
+      | None => None (* Unable to step subexpression of field access *)
       end
     end
   | f_meth e mn => None (* TODO *)
