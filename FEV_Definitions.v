@@ -99,9 +99,13 @@ Fixpoint feval (e:fexp) (fct:fctable) : option fexp :=
       | None => None (* Unable to step subexpression of field access *)
       end
     end
-  | f_meth e mn => None (* TODO *)
-  | f_new cn => None (* TODO *)
-  | f_var v => None (* TODO *)
+  | f_meth e mn =>
+    match feval e fct with
+    | Some e' => Some (f_meth e' mn) (* RC-INVK-RECV *)
+    | None => None (* If the inner expression can't be stepped, nothing can *)
+    end
+  | f_new cn => None (* Basic class instantiations never step *)
+  | f_var v => None (* Variables never step *)
   end.
 
 Fixpoint teval (e:fexp) (fct:fctable) (n:nat) : fexp :=
