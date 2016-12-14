@@ -47,16 +47,14 @@ Fixpoint decomp (e:fexp) : fexp * list fexp :=
 
 Fixpoint feval (e:fexp) (fct:fctable) : option fexp :=
   match e with
-  | f_apply e1 e2 =>                    (* If the expression is an application we    *)
-    match feval e2 fct with             (* have to both simplify arguments AND       *)
-    | Some e2' => Some (f_apply e1 e2') (* check for the conditions for method calls *)
-    | None =>                           (* since those can be invoked.               *)
+  | f_apply e1 e2 =>
+    match feval e2 fct with
+    | Some e2' => Some (f_apply e1 e2') (* RC-INVK-ARG, RC-NEW-ARG *)
+    | None =>
       match feval e1 fct with
-      | Some e1' => Some (f_apply e1' e2)
+      | Some e1' => Some (f_apply e1' e2) (* RC-INVK-RECV *)
       | None =>
-        match decomp e with
-        | (eb, nil) => None (* Shouldn't happen since e is f_apply *)
-        | (eb, ps) =>
+        let (eb, ps) := decomp e in
           match eb with
           | f_meth em mn =>
             match decomp em with
@@ -77,7 +75,6 @@ Fixpoint feval (e:fexp) (fct:fctable) : option fexp :=
             end
           | eb => None (* No other simplifications can be made *)
           end
-        end
       end
     end
   | f_field e fn =>
