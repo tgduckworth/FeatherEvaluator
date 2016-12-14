@@ -36,7 +36,7 @@ Fixpoint getrm {A:Type} (x: atom) (E: list (atom * A)) : option (A * (list (atom
     end
   end.
 
-Fixpoint fmbody (cn:cname) (mn:mname) (fct:fctable) : option (env * fexp) :=
+(*Fixpoint fmbody (cn:cname) (mn:mname) (fct:fctable) : option (env * fexp) :=
   match getrm cn fct with
   | Some ((pn, _, ms), fctr) =>
     match get mn ms with
@@ -44,7 +44,7 @@ Fixpoint fmbody (cn:cname) (mn:mname) (fct:fctable) : option (env * fexp) :=
     | None => fmbody pn mn fctr (* Recursive call to find in parent classes *)
     end
   | None => None (* Class not found *)
-  end.
+  end.*)
 
 Fixpoint subst_fexp (E : fbenv) (e : fexp) {struct e} : fexp :=
     match e with
