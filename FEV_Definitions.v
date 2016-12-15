@@ -16,8 +16,8 @@ Fixpoint fexp2exp (e:fexp) : exp :=
   | f_new cn => e_new cn nil                  (* New 'base' *)
   | f_apply e1 e2 =>                          (* Method/New application *)
     match fexp2exp e1 with
-    | e_new cn al => e_new cn ((fexp2exp e2)::al)
-    | e_meth e mn al => e_meth e mn ((fexp2exp e2)::al)
+    | e_new cn al => e_new cn (al ++ (fexp2exp e2)::nil)
+    | e_meth e mn al => e_meth e mn (al ++ (fexp2exp e2)::nil)
     | e1 => e1 (* This case should never occur; it's malformed *)
     end
   end.
