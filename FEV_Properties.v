@@ -2,6 +2,17 @@ Require Import Metatheory.
 Require Import FJ_Definitions.
 Require Import FEV_Definitions.
 
+Theorem decomp_no_apply:
+  forall (e1 e2 e3 e4:fexp), fst (decomp (f_apply e1 e2)) <> f_apply e3 e4.
+Proof.
+  intro. induction e1; intros.
+  - simpl. discriminate.
+  - simpl. discriminate.
+  - simpl. discriminate.
+  - simpl. discriminate.
+  - apply IHe1_1.
+Qed.
+
 Theorem feval_sound:
   forall (e1 e2:fexp) (fct:fctable), feval e1 fct = Some e2 -> eval (fexp2exp e1) (fexp2exp e2).
 Proof.
@@ -38,6 +49,11 @@ Proof.
         apply eval_context with (EE:=EE') in H0.
         --  subst. assumption.
         --  rewrite HeqEE'. apply ec_new_args. rewrite HeqEE''. apply esc_head.
-      * admit.
+      * subst. destruct (fst (decomp (f_apply f0_1 f0_2))) eqn:DD.
+        --  discriminate.
+        --  discriminate.
+        --  admit.
+        --  admit.
+        --  apply decomp_no_apply in DD. exfalso. assumption.
     + admit.
 Admitted.

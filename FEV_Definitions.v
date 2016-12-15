@@ -72,7 +72,7 @@ Fixpoint feval (e:fexp) (fct:fctable) : option fexp :=
   | f_apply e1 e2 =>
     match feval e2 fct with
     | Some e2' =>
-      match e1 with
+      match fst (decomp e1) with
       | f_var v => None      (* Can't step arguments unless well-formed *)
       | f_field e fn => None
       | e1 => Some (f_apply e1 e2') (* RC-INVK-ARG, RC-NEW-ARG *)
