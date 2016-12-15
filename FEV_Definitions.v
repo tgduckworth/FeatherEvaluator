@@ -8,6 +8,8 @@ Inductive fexp : Set :=
 | f_new : cname -> fexp
 | f_apply : fexp -> fexp -> fexp.
 
+(* f_apply applies arguments in the reverse order that you would write them *)
+(* on paper *)
 Fixpoint fexp2exp (e:fexp) : exp :=
   match e with
   | f_var v => e_var v
@@ -39,6 +41,15 @@ Fixpoint fmbody (cn:cname) (mn:mname) (fct:fctable) : option (env * fexp) :=
   | nil => None
   end.
 
+(* Assumes an ordering such that parents are closer to the nil in fct *)
+Fixpoint ffields (cn:cname) (fct:fctable) : flds :=
+  match fct with
+  | (C,(D,fs,_))::t =>
+    if C == cn then (ffields D t) ++ fs
+    else ffields cn t
+  | nil => nil
+  end.
+
 Fixpoint subst_fexp (E : fbenv) (e : fexp) {struct e} : fexp :=
     match e with
     | f_var v =>
@@ -54,7 +65,7 @@ Fixpoint subst_fexp (E : fbenv) (e : fexp) {struct e} : fexp :=
 
 Fixpoint decomp (e:fexp) : fexp * list fexp :=
   match e with
-  | f_apply e1 e2 => (fst (decomp e1), e2::(snd (decomp e1)))
+  | f_apply e1 e2 => (fst (decomp e1), (snd (decomp e1)) ++ e2::nil)
   | e => (e, nil)
   end.
 
@@ -92,9 +103,9 @@ Fixpoint feval (e:fexp) (fct:fctable) : option fexp :=
       let (eb, ps) := decomp (f_apply e1 e2) in
         match eb with
         | f_new cn =>
-          match get cn fct with
-          | Some (_, fs, _) => get fn (combine (List.map fst fs) ps) (* R-FIELD *)
-          | None => None (* Class not found *)
+          match ffields cn fct with
+          | nil => None (* Class not found, or no fields *)
+          | fs => get fn (combine (List.map fst fs) ps) (* R-FIELD *)
           end
         | eb =>
           match feval e fct with

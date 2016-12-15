@@ -10,10 +10,19 @@ Definition setFst : atom := 5.
 Definition newFst : atom := 6.
 Definition myFst : atom := 7.
 Definition mySnd : atom := 8.
+Definition myThr : atom := 9.
+Definition E : atom := 10.
+Definition PairC : atom := 11.
 
+(* PARENTS AFTER CHILDREN *)
 Definition ct2 : fctable := (
     (C,(Object,nil,nil))
   ::(D,(Object,nil,nil))
+  ::(PairC,(
+      Pair,
+      ((myThr, Object) :: nil),
+      nil
+    ))
   ::(Pair,(
       Object,
       ((myFst, Object) :: (mySnd, Object) :: nil),
@@ -21,7 +30,7 @@ Definition ct2 : fctable := (
     ))
   :: nil).
 
-Definition myfexp : fexp := f_field (f_apply (f_apply (f_new Pair) (f_new D)) (f_new C)) mySnd.
+Definition myfexp : fexp := f_field (f_apply (f_apply (f_apply (f_new PairC) (f_new D)) (f_new C)) (f_new E)) myThr.
 
 Eval compute in feval myfexp ct2.
 
