@@ -8,8 +8,6 @@ Inductive fexp : Set :=
 | f_new : cname -> fexp
 | f_apply : fexp -> fexp -> fexp.
 
-(* f_apply applies arguments in the reverse order that you would write them *)
-(* on paper *)
 Fixpoint fexp2exp (e:fexp) : exp :=
   match e with
   | f_var v => e_var v
