@@ -26,25 +26,18 @@ Notation fbenv := (list (var * fexp)).
 Notation fmths := (list (mname * (typ * env * fexp))).
 Notation fctable := (list (cname * (cname * flds * fmths))).
 
-Fixpoint getrm {A:Type} (x: atom) (E: list (atom * A)) : option (A * (list (atom * A))) :=
-  match E with
+(* Assumes an ordering such that parents are closer to the nil in fct *)
+Fixpoint fmbody (cn:cname) (mn:mname) (fct:fctable) : option (env * fexp) :=
+  match fct with
+  | (C,(D,_,ms))::t =>
+    if C == cn then
+      match get mn ms with
+      | Some (_, en, ex) => Some (en, ex)
+      | None => fmbody D mn t
+      end
+    else fmbody cn mn t
   | nil => None
-  | (y,v)::E => if x == y then Some (v, E) else
-    match getrm x E with
-    | Some (v', E') => Some (v', (y,v)::E')
-    | None => None
-    end
   end.
-
-(*Fixpoint fmbody (cn:cname) (mn:mname) (fct:fctable) : option (env * fexp) :=
-  match getrm cn fct with
-  | Some ((pn, _, ms), fctr) =>
-    match get mn ms with
-    | Some (_, en, ex) => Some (en, ex) (* Method found for class *)
-    | None => fmbody pn mn fctr (* Recursive call to find in parent classes *)
-    end
-  | None => None (* Class not found *)
-  end.*)
 
 Fixpoint subst_fexp (E : fbenv) (e : fexp) {struct e} : fexp :=
     match e with
@@ -82,13 +75,9 @@ Fixpoint feval (e:fexp) (fct:fctable) : option fexp :=
             | (emb, emps) =>
               match emb with
               | f_new cn =>
-                match get cn fct with
-                | Some (_, _, ms) =>
-                  match get mn ms with
-                  | Some (_, en, ex) => Some (subst_fexp ((this, em)::(combine (List.map fst en) ps)) ex) (* R-INVK *)
-                  | None => None (* TODO: Case for inheritance *)
-                  end
-                | None => None (* Class not found *)
+                match fmbody cn mn fct with
+                | Some (en, ex) => Some (subst_fexp ((this, em)::(combine (List.map fst en) ps)) ex) (* R-INVK *)
+                | None => None (* No such method in the hierarchy *)
                 end
               | emb => None (* Method call on application to non-object *)
               end

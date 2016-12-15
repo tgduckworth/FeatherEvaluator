@@ -11,9 +11,11 @@ Proof.
     + inversion H.
     + admit.
     + admit.
+    + simpl in H. discriminate.
     + admit.
-    + admit.
-  - admit.
+  - simpl in *. destruct (feval e1 ct).
+    + injection H. intro. rewrite <- H0. simpl.
+    + discriminate.
   - simpl in H. discriminate.
   - admit.
 Admitted.
