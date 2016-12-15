@@ -21,5 +21,23 @@ Proof.
       * rewrite HeqEE'. apply ec_meth_arg0.
     + discriminate.
   - simpl in H. discriminate.
-  - admit.
+  - destruct (feval e1_2 fct) eqn:Fe1_2.
+    + apply IHe1_2 in Fe1_2 as H0. simpl in H. rewrite Fe1_2 in H.
+      destruct e1_1 eqn:De1_1.
+      * discriminate.
+      * discriminate.
+      * injection H. intro. rewrite <- H1. simpl.
+        remember (fun (e:exp) => e::nil) as EE''.
+        remember (fun (e:exp) => e_meth (fexp2exp f0) m (EE'' e)) as EE'.
+        apply eval_context with (EE:=EE') in H0.
+        --  subst. assumption.
+        --  rewrite HeqEE'. apply ec_meth_args. rewrite HeqEE''. apply esc_head.
+      * injection H. intro. rewrite <- H1. simpl.
+        remember (fun (e:exp) => e::nil) as EE''.
+        remember (fun (e:exp) => e_new c (EE'' e)) as EE'.
+        apply eval_context with (EE:=EE') in H0.
+        --  subst. assumption.
+        --  rewrite HeqEE'. apply ec_new_args. rewrite HeqEE''. apply esc_head.
+      * admit.
+    + admit.
 Admitted.
