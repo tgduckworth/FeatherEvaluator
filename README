@@ -1,8 +1,17 @@
 Language-Based Security Final Project Readme
 FeatherEvaluator
 
+Erick Bauman
+Tristan Duckworth
+Shamila Wickramasuriya
+
+---SOURCE CODE---
+
+All source is in the "src" directory.
+
 In order to compile, simply run make in the "src" directory.
 All files should compile and can be examined in Coq IDE.
+We used Coq version 8.5pl2.
 
 Here are the files that we added:
 FEV_Definitions.v	Contains our function definitions, including
@@ -10,3 +19,11 @@ FEV_Definitions.v	Contains our function definitions, including
 			to perform one small-step semantics step.
 FEV_Properties.v	Contains all of our added proofs.
 FEV_Example.v		Contains an example evaluation with Pair objects.
+
+---DOCUMENTS---
+
+All documents are in the "Document" directory.
+
+Here are the important documents:
+Presentation.pptx	Our presentation slides
+Report.pdf		Our final project report --- LaTeX source available
