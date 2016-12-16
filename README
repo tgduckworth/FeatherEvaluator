@@ -1,0 +1,12 @@
+Language-Based Security Final Project Readme
+FeatherEvaluator
+
+In order to compile, simply run make in the "src" directory.
+All files should compile and can be examined in Coq IDE.
+
+Here are the files that we added:
+FEV_Definitions.v	Contains our function definitions, including
+			feval, which is our functional implementation
+			to perform one small-step semantics step.
+FEV_Properties.v	Contains all of our added proofs.
+FEV_Example.v		Contains an example evaluation with Pair objects.
