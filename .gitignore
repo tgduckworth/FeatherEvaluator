@@ -3,3 +3,9 @@
 *.v.d
 *.aux
 *.v#
+*~
+*.log
+*.synctex.gz
+*.blg
+*.bbl
+*#

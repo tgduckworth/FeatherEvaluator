@@ -1,0 +1,36 @@
+\documentclass{article}
+\usepackage{amsfonts}
+\usepackage{cite}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\newcommand{\ignore}[1]{}
+\author{\textbf{Erick Bauman} \\ exb131030@utdallas.edu \\\textbf{Tristan Duckworth} \\ txd123130@utdallas.edu \\\textbf{Shamila Wickramasuriya} \\ scw130030@utdallas.edu}
+\title{\huge{Language-Based Security Final Project Report} \\ \LARGE{FeatherEvaluator}}
+\begin{document}
+\maketitle
+
+\section{Project Motivation}
+
+Popular languages today have many vulnerabilities, especially higher-level languages that intend to make life easier for developers and prevent them from making common mistakes.  Java, which provides a safer environment to program in than C or C++, nevertheless has a large and complex runtime program with its own share of vulnerabilities.  The high complexity of a modern language can benefit from formalization so that properties of both the core semantics and a runtime implementation can be proved to behave as intended.  Unfortunately, Java is complex, and we are far from having a fully validated JRE.
+
+However, it is possible to take a first step in this direction.  A formal definition of the core syntax of Java exists in the form of Featherweight Java\cite{igarashi2001featherweight}, which has allowed proofs to be made demonstrating certain properties of Java.  This omits many of the features of Java, such as assignment, base types, and access control.  However, this simplification makes proofs much more feasible.
+
+Several Coq implementations of Featherweight Java have been written, allowing for proofs to be machine-checked~\cite{mackay2012encoding, delaware2011product,castfree}.  Unfortunately, the implementations available only provide definitions of evaluating Featherweight Java expressions in a propositional form.  While practical for use in proofs, these implementations do not provide a functional implementation, which would be useful for eventually proving the correctness of an actual Java runtime.  While eventually it would be practical to prove the correct behavior of a functional implementation that evaluates Java bytecode instead of source code, we wanted to focus on demonstrating and proving the soundness of a functional implementation of the Featherweight Java semantics in Coq.
+
+\section{Accomplishments}
+
+We implemented a function to evaluate the small-step semantics of Featherweight Java, based on a cast-free implementation of Featherweight Java\cite{castfree}.
+
+We wrote a proof of soundness of our function, which stated that for any expression, if our implementation produced a resulting expression, then the propositional evaluation would hold:
+
+\section{Project Summary}
+
+Since we could start with an existing Featherweight Java implementation, the proving that the functional implementation was ``correct'' meant proving that for any expression, if our function produces a resulting expression, then the original propositional implementation holds for that expression.  Since the propositional implementation has already been proved correct by the original authors, this is sufficient to prove soundness (but not completeness) of the function.
+
+\section{Team Coordination}
+
+\section{Future Work}
+
+\bibliography{Report}{}
+\bibliographystyle{plain}
+
+\end{document}
