@@ -34,6 +34,12 @@ Definition myfexp : fexp := f_field (f_apply (f_apply (f_apply (f_new PairC) (f_
 
 Eval compute in feval myfexp ct2.
 
+(**
+OLD IMPLEMENTATION EXAMPLES BELOW
+---
+Old list-based arguments implementation not compatible with new function-based arguments implementation
+**)
+(**
 Definition ct : fctable := (
     (C,(Object,nil,nil))
   ::(D,(Object,nil,nil))
@@ -98,3 +104,4 @@ Theorem rc_field_ex:
   eval myexp4
 
 *)
+**)
