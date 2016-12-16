@@ -13,6 +13,9 @@ In order to compile, simply run make in the "src" directory.
 All files should compile and can be examined in Coq IDE.
 We used Coq version 8.5pl2.
 
+This directory is a git repository, so the commit logs can be examined
+if one desires.
+
 Here are the files that we added:
 FEV_Definitions.v	Contains our function definitions, including
 			feval, which is our functional implementation
