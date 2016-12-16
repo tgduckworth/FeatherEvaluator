@@ -126,5 +126,16 @@ Proof.
                 **  apply apply_rev_args in HeqRPS as F0_2. admit.
         --  admit.
         --  apply decomp_no_apply in DD. exfalso. assumption.
-    + admit.
+    + destruct (feval e1_2 fct).
+     * discriminate.
+     * destruct (snd (decomp (f_apply e1_1 e1_2))) eqn:DD.
+        --  simpl in DD. apply app_eq_nil in DD. destruct DD. discriminate.
+        --  destruct (f_apply e1_1 e1_2).
+          ++   simpl in H. discriminate.
+          ++  destruct (feval e1_2 fct) eqn : B.
+              +++ discriminate.
+              +++ discriminate.
+          ++ discriminate.
+          ++ discriminate.
+          ++ admit.
 Admitted.
