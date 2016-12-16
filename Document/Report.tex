@@ -18,7 +18,7 @@ Several Coq implementations of Featherweight Java have been written, allowing fo
 
 \section{Accomplishments}
 
-We implemented a function to evaluate the small-step semantics of Featherweight Java, based on a cast-free implementation of Featherweight Java\cite{castfree}.
+We implemented a function, \texttt{feval}, to evaluate the small-step semantics of Featherweight Java, based on a cast-free implementation of Featherweight Java\cite{castfree}.
 
 We wrote part of a proof of soundness of our function, which stated that for any expression, if our implementation produced a resulting expression, then the propositional evaluation would hold:
 
@@ -64,9 +64,9 @@ Our initial response to this was to remove the queried class from the class tabl
 
 \section{Future Work}
 
-We hope to prove that our evaluator only produces states that is valid under the propositional definition of single-step evaluation for Featherweight Java. Our proof is yet to be completed and proving the in reverse direction for total correctness is another possible future work.
+We hope to prove that our evaluator only produces states that is valid under the propositional definition of single-step evaluation for Featherweight Java. Our proof is yet to be completed and proving it in reverse direction for total correctness is another possible future work. In order to do so, future work may require a thorough examination of the relationship between \texttt{exp} and \texttt{fexp}. For now we have a one-way conversion function; the \texttt{decomp} function may prove useful for reversing this conversion, and it seems that \texttt{fexp} is generally more expressive, so backward translation may consist largely of detecting illegal expressions.
 
-Further, we believe that our work can be extended to prove the correctness of Java byte code instead of the source code. The result will be useful in proving the correctness of Java Runtime Environment including the safety properties.
+We believe that our work can be extended to prove the correctness of Java byte code instead of the source code. This result will be useful in proving the correctness of the Java Runtime Environment, hopefully including many safety properties.
 
 \bibliography{Report}{}
 \bibliographystyle{plain}
