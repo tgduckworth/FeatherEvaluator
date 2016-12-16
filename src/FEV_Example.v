@@ -26,13 +26,29 @@ Definition ct2 : fctable := (
   ::(Pair,(
       Object,
       ((myFst, Object) :: (mySnd, Object) :: nil),
-      nil
+      (
+        (setFst,
+         (
+          Pair,
+          (newFst, Object) :: nil,
+          f_apply (f_apply (f_new Pair) (f_var newFst)) (f_field (f_var this) mySnd)
+         )
+        )
+        :: nil 
+      )
     ))
   :: nil).
 
 Definition myfexp : fexp := f_field (f_apply (f_apply (f_apply (f_new PairC) (f_new D)) (f_new C)) (f_new E)) myThr.
 
 Eval compute in feval myfexp ct2.
+Eval compute in teval myfexp ct2 100.
+
+Definition myfexp2 : fexp := f_apply (f_meth (  f_apply (f_apply (f_new Pair) (f_new C)) (f_new D)   ) setFst) (f_new E).
+
+Eval compute in feval myfexp2 ct2.
+(** Something is wrong... **)
+(** Eval compute in teval myfexp2 ct2 2. **)
 
 (**
 OLD IMPLEMENTATION EXAMPLES BELOW
