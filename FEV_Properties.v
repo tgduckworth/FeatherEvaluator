@@ -71,13 +71,24 @@ Theorem feval_sound:
 Proof.
   intro. induction e1; intros.
   - simpl in H. discriminate.
-  - destruct e1 eqn:D.
-    + inversion H.
-    + admit.
-    + admit.
-    + simpl in H. discriminate.
-    + admit.
-  - simpl in *. destruct (feval e1 fct) eqn:D.
+  - destruct (feval e1 fct) eqn : A. 
+    + apply IHe1 in A as H0. simpl in H. rewrite A in H. 
+      destruct e1 eqn : D.
+       * discriminate.
+       * injection H. intro. rewrite <- H1. simpl.
+         inversion H0.
+          -- admit.
+          -- admit.
+       * injection H. intros. rewrite <- H1. simpl. 
+         remember (fun (e:exp) => e::nil) as EE''.
+         remember (fun (e:exp) => e_meth (fexp2exp f0) m (EE'' e)) as EE'.
+         apply eval_context with (EE:=EE') in H0.
+            --  subst. admit.
+            --  rewrite HeqEE'. apply ec_meth_args. rewrite HeqEE''. apply esc_head.
+       * discriminate.
+       * admit.
+    + simpl in H. admit.
+  - simpl in H. destruct (feval e1 fct) eqn:D.
     + apply IHe1 in D. remember (fun (e:exp) => e_meth e m nil) as EE'.
       apply eval_context with (EE:=EE') in D.
       * rewrite HeqEE' in D. injection H. intro. rewrite <- H0. simpl.
