@@ -1,0 +1,58 @@
+
+                          Cast-Free Featherweight Java
+
+   Bruno De Fraine, with help from Erik Ernst and Mario Südholt, Summer 2008
+
+REQUIREMENTS
+
+  Developed using Coq v8.2. Also tested using Coq v8.2pl1.
+
+BUILDING
+
+  To build, run:
+
+    ./configure
+    make
+
+  To generate some documentation, try:
+
+    make html
+    make all.pdf
+
+  To do a complete Coq black-box check and print the employed axioms:
+
+    coqchk -o FJ_Properties
+
+CONTENTS
+
+  The following source files are included:
+
+    AdditionalTactics.v       Additional tactics used in the proofs
+    Atom.v                    An opaque definition of atoms, internally
+                              implemented using natural numbers
+    Metatheory.v              General definitions and properties, mainly
+                              regarding environments that map atoms to other
+                              entities
+    FJ_Definitions.v          The definition of the language and the intended
+                              safety properties
+    FJ_Facts.v                Induction schemes and straightforward properties
+                              of the language (including their proofs)
+    FJ_Properties.v           Proofs of the safety properties and auxiliary
+                              lemmas
+    FJ_Example.v              Typical example of the Pair class
+
+REMARKS
+
+  There are some small differences to the version of Igarashi et al.:
+
+    - Casts have been omitted; this avoids the possibility of failing casts for
+      the safety properties
+    - Congruent evaluation is defined using evaluation contexts
+    - The term typing rules will require a well-formed environment (directly or
+      indirectly)
+    - Support for covariant method overriding
+
+FEEDBACK
+
+  Send comments and bugs to Bruno De Fraine <Bruno.De.Fraine@vub.ac.be>.
+
