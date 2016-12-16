@@ -20,7 +20,7 @@ Several Coq implementations of Featherweight Java have been written, allowing fo
 
 We implemented a function to evaluate the small-step semantics of Featherweight Java, based on a cast-free implementation of Featherweight Java\cite{castfree}.
 
-We wrote a proof of soundness of our function, which stated that for any expression, if our implementation produced a resulting expression, then the propositional evaluation would hold:
+We wrote part of a proof of soundness of our function, which stated that for any expression, if our implementation produced a resulting expression, then the propositional evaluation would hold:
 
 \texttt{
 forall (e1 e2:fexp) (fct:fctable),
@@ -32,11 +32,31 @@ forall (e1 e2:fexp) (fct:fctable),
 
 \section{Project Summary}
 
-Since we could start with an existing Featherweight Java implementation, the proving that the functional implementation was ``correct'' meant proving that for any expression, if our function produces a resulting expression, then the original propositional implementation holds for that expression.  Since the propositional implementation has already been proved correct by the original authors, this is sufficient to prove soundness (but not completeness) of the function.
+\subsection{Overview}
+
+Since we could start with an existing Featherweight Java implementation, the process of proving that the functional implementation was ``correct'' meant proving that for any expression, if our function produces a resulting expression, then the original propositional implementation holds for that expression.  Since the propositional implementation has already been proved correct by the original authors, this is sufficient to prove soundness (but not completeness) of the function.
+
+We discovered that the original representation of expressions was not well-suited to computation. In particular, the congruence rules that specify how expressions used as arguments are reduced allow any argument to be reduced at a given time. Since the original implementation of expressions, \texttt{exp}, made use of lists to represent collections of arguments, we were unable to write proofs when they depended on the reduction of these arguments. In light of this, we implemented a new representation, \texttt{fexp}, that can be readily translated to \texttt{exp} (for the sake of writing proofs with respect to the propositional definitions of evaluation) and does not represent arguments as a list (allowing us to reason about the computations we perform).
+
+Our work currently consists of three major source files:
+
+\begin{itemize}
+	\item \texttt{FEV\_Definitions.v} contains the definition of \texttt{fexp} and \texttt{fexp2exp}, redefines some of the original definitions (such as that for class tables) in terms of \texttt{fexp} rather than \texttt{exp}, adds some supporting functions for evaluation, and finally contains \texttt{feval} itself. As a bonus, it contains a function \texttt{teval} that evaluates any \texttt{fexp} with \texttt{feval} until no more progress can be made.
+	
+	\item \texttt{FEV\_Properties.v} contains auxiliary lemmas for reasoning about lists and our supporting functions as well as the (incomplete) proof of soundness.
+	
+	\item \texttt{FEV\_Example.v} contains an example of a computation being performed on a simple \texttt{fexp} as well as a great number of old examples meant for a version of our evaluator that targeted \texttt{exp} instead.
+\end{itemize}
+
+\subsection{Difficulties}
 
 \section{Team Coordination}
 
 \section{Future Work}
+
+We hope to prove that our evaluator only produces states that is valid under the propositional definition of single-step evaluation for Featherweight Java. Our proof is yet to be completed and proving the in reverse direction for total correctness is another possible future work.
+
+Further, we believe that our work can be extended to prove the correctness of Java byte code instead of the source code. The result will be useful in proving the correctness of Java Runtime Environment including the safety properties.
 
 \bibliography{Report}{}
 \bibliographystyle{plain}
