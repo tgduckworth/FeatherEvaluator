@@ -22,6 +22,14 @@ We implemented a function to evaluate the small-step semantics of Featherweight 
 
 We wrote a proof of soundness of our function, which stated that for any expression, if our implementation produced a resulting expression, then the propositional evaluation would hold:
 
+\texttt{
+forall (e1 e2:fexp) (fct:fctable),
+}
+
+\texttt{
+    feval e1 fct = Some e2 -> eval (fexp2exp e1) (fexp2exp e2).
+}
+
 \section{Project Summary}
 
 Since we could start with an existing Featherweight Java implementation, the proving that the functional implementation was ``correct'' meant proving that for any expression, if our function produces a resulting expression, then the original propositional implementation holds for that expression.  Since the propositional implementation has already been proved correct by the original authors, this is sufficient to prove soundness (but not completeness) of the function.
