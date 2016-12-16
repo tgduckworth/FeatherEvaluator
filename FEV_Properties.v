@@ -21,6 +21,19 @@ Proof.
   intros. symmetry. assumption.
 Qed.
 
+Lemma decomp_reduce:
+  forall (e1 e2 e eb:fexp) (ps:list fexp),
+    decomp (f_apply (f_apply e1 e2) e) = (eb, ps ++ e::nil) /\ e1 <> eb ->
+      decomp (f_apply e1 e2) = (eb, ps).
+Proof.
+  intro. induction e1; intros; destruct H; simpl in *; injection H; intros.
+  - contradiction.
+  - contradiction.
+  - contradiction.
+  - contradiction.
+  - admit.
+Admitted.
+
 Lemma decomp_apply_meth:
   forall (e1 e2 eb:fexp) (ps:list fexp) (mn:mname),
     decomp (f_apply e1 e2) = (f_meth eb mn, ps ++ e2::nil) ->
@@ -50,7 +63,7 @@ Proof.
   - simpl. discriminate.
   - simpl. discriminate.
   - intros. inversion H. subst. simpl. reflexivity.
-  - intros. simpl in H.
+  - intros.
 Admitted.
 
 Theorem feval_sound:
