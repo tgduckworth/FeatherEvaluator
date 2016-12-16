@@ -18,7 +18,7 @@ Several Coq implementations of Featherweight Java have been written, allowing fo
 
 \section{Accomplishments}
 
-We implemented a function to evaluate the small-step semantics of Featherweight Java, based on a cast-free implementation of Featherweight Java\cite{castfree}.
+We implemented a function, \texttt{feval}, to evaluate the small-step semantics of Featherweight Java, based on a cast-free implementation of Featherweight Java\cite{castfree}.
 
 We wrote part of a proof of soundness of our function, which stated that for any expression, if our implementation produced a resulting expression, then the propositional evaluation would hold:
 
@@ -45,10 +45,20 @@ Our work currently consists of three major source files:
 	
 	\item \texttt{FEV\_Properties.v} contains auxiliary lemmas for reasoning about lists and our supporting functions as well as the (incomplete) proof of soundness.
 	
-	\item \texttt{FEV\_Example.v} contains an example of a computation being performed on a simple \texttt{fexp} as well as a great number of old examples meant for a version of our evaluator that targeted \texttt{exp} instead.
+	\item \texttt{FEV\_Example.v} contains a couple of examples of computations being performed on simple expressions as well as a great number of old examples meant for a version of our evaluator that targeted \texttt{exp} instead of \texttt{fexp}.
 \end{itemize}
 
 \subsection{Difficulties}
+
+The project encountered a number of difficulties that made implementing the \texttt{feval} function the most arduous task overall. Our original implementation of \texttt{feval} took on only two or three major forms, but once it was rewritten to address a major issue it took more than three iterations on the overall structure of the function in order to have it accepted by Coq. This made proving its correctness even more difficult, as the constant changes to \texttt{feval} meant that the proof structure also needed to be altered significantly on more than one occasion.
+
+The most significant difficulty faced by the project was the result of the original representation of expressions not being suited to reduction under two of the four congruence rules. Specifically, the original models of method invocations and object instantiations accepted their arguments as lists of expressions. This becomes problematic when a reduction needs to be made on \emph{some} expression within this list of arguments. Our original approach to solving this consisted of a mutually recursive function that examined expressions in this list of arguments one by one until finding an expression that steps. If none of the expressions in the list were to be able to take a step, then neither of the congruence rules applying to such lists would apply; however, the reliance of this list evaluation function on \texttt{feval} itself meant that Coq could not determine whether any progress was being made.
+
+The response to this consisted of a reformulation of the definition of expressions: \texttt{fexp}. Rather than using lists to represent collections of arguments to another expression, \texttt{fexp} features a new form of expression \texttt{f\_apply} that applies an argument expression to a base expression. This allows us to curry applications of arguments to a basic expression type (\texttt{f\_meth} or \texttt{f\_new} when the expression is well-typed). When we need to reduce an expression that has the form \texttt{f\_apply}, we can apply the congruence rules \texttt{RC-INVK-ARG} and \texttt{RC-NEW-ARG} during recursive calls to \texttt{feval}, which merely checks to see whether the second argument to \texttt{f\_apply} takes a step.
+
+Handling inheritance proved to be difficult in a similar regard. The propositional implementation defines a class table to be a list of class definitions. At this time, we still use this definition when doing computations. Handling field and method inheritance is conceptually straightforward: when looking for a field or method to use for a class, we simply search for that class and check to see if the field or method is defined there. If it is, we may proceed, but if it is not, we can recursively search for the field or method within the parent class. Unfortunately, this becomes problematic if we are not reducing the list in which the class table is stored. The hierarchy of classes is implicit within the list, and since Coq is not aware of its structure, it will not accept a function that acts in this way.
+
+Our initial response to this was to remove the queried class from the class table when making a recursive search for the parent, since this reduces the size of the list by one and hence should represent a reducing argument in the recursive function; however, since the removed element may exist in the middle of the list, Coq is again unaware of there having been a significant structural change to the list of classes. The use of this modification was unsuccessful. Fortunately, with the assumption of an ordering of the classes in the list we can implement a function that assumes that parent classes are always located in the tail of the list. This allows us to perform a linear scan of the list for the definition we need.
 
 \section{Team Coordination}
 
@@ -67,9 +77,9 @@ Report---Future Work    &    Shamila      \\
 
 \section{Future Work}
 
-We hope to prove that our evaluator only produces states that is valid under the propositional definition of single-step evaluation for Featherweight Java. Our proof is yet to be completed and proving the in reverse direction for total correctness is another possible future work.
+We hope to prove that our evaluator only produces states that is valid under the propositional definition of single-step evaluation for Featherweight Java. Our proof is yet to be completed and proving it in reverse direction for total correctness is another possible future work. In order to do so, future work may require a thorough examination of the relationship between \texttt{exp} and \texttt{fexp}. For now we have a one-way conversion function; the \texttt{decomp} function may prove useful for reversing this conversion, and it seems that \texttt{fexp} is generally more expressive, so backward translation may consist largely of detecting illegal expressions.
 
-Further, we believe that our work can be extended to prove the correctness of Java byte code instead of the source code. The result will be useful in proving the correctness of Java Runtime Environment including the safety properties.
+We believe that our work can be extended to prove the correctness of Java byte code instead of the source code. This result will be useful in proving the correctness of the Java Runtime Environment, hopefully including many safety properties.
 
 \bibliography{Report}{}
 \bibliographystyle{plain}
