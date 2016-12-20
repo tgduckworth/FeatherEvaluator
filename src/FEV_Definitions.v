@@ -61,10 +61,16 @@ Fixpoint subst_fexp (E : fbenv) (e : fexp) {struct e} : fexp :=
     | f_apply e1 e2 => f_apply (subst_fexp E e1) (subst_fexp E e2)
     end.
 
-Fixpoint decomp (e:fexp) : fexp * list fexp :=
+Fixpoint fexp_base (e:fexp) : fexp :=
   match e with
-  | f_apply e1 e2 => (fst (decomp e1), (snd (decomp e1)) ++ e2::nil)
-  | e => (e, nil)
+  | f_apply e1 e2 => fexp_base e1
+  | e => e
+  end.
+
+Fixpoint fexp_args (e:fexp) : list fexp :=
+  match e with
+  | f_apply e1 e2 => e2::(fexp_args e1)
+  | e => nil
   end.
 
 Fixpoint feval (e:fexp) (fct:fctable) : option fexp :=
@@ -72,7 +78,7 @@ Fixpoint feval (e:fexp) (fct:fctable) : option fexp :=
   | f_apply e1 e2 =>
     match feval e2 fct with
     | Some e2' =>
-      match fst (decomp e1) with
+      match fexp_base e1 with
       | f_var v => None      (* Can't step arguments unless well-formed *)
       | f_field e fn => None
       | e1 => Some (f_apply e1 e2') (* RC-INVK-ARG, RC-NEW-ARG *)
@@ -81,41 +87,39 @@ Fixpoint feval (e:fexp) (fct:fctable) : option fexp :=
       match feval e1 fct with
       | Some e1' => Some (f_apply e1' e2) (* RC-INVK-RECV *)
       | None =>
-        let (eb, ps) := decomp e in
-          match eb with
-          | f_meth em mn =>
-            match decomp em with
-            | (em, nil) => None (* Method call on non-object *)
-            | (emb, emps) =>
-              match emb with
-              | f_new cn =>
-                match fmbody cn mn fct with
-                | Some (en, ex) => Some (subst_fexp ((this, em)::(combine (List.map fst en) ps)) ex) (* R-INVK *)
-                | None => None (* No such method in the hierarchy *)
-                end
-              | emb => None (* Method call on application to non-object *)
+        match fexp_base e1 with
+        | f_meth em mn =>
+          match fexp_args em with
+          | nil => None (* Method call on non-object *)
+          | emps =>
+            match fexp_base em with
+            | f_new cn =>
+              match fmbody cn mn fct with
+              | Some (en, ex) => Some (subst_fexp ((this, em)::(combine (List.map fst en) (fexp_args e))) ex) (* R-INVK *)
+              | None => None (* No such method in the hierarchy *)
               end
+            | emb => None (* Method call on application to non-object *)
             end
-          | eb => None (* No other simplifications can be made *)
           end
+        | eb => None (* No other simplifications can be made *)
+        end
       end
     end
   | f_field e fn =>
     match e with
     | f_apply e1 e2 =>
-      let (eb, ps) := decomp (f_apply e1 e2) in
-        match eb with
-        | f_new cn =>
-          match ffields cn fct with
-          | nil => None (* Class not found, or no fields *)
-          | fs => get fn (combine (List.map fst fs) ps) (* R-FIELD *)
-          end
-        | eb =>
-          match feval e fct with
-          | Some e' => Some (f_field e' fn) (* RC-FIELD *)
-          | None => None (* Unable to step subexpression of field access *)
-          end
+      match fexp_base e1 with
+      | f_new cn =>
+        match ffields cn fct with
+        | nil => None (* Class not found, or no fields *)
+        | fs => get fn (combine (List.map fst fs) (fexp_args e)) (* R-FIELD *)
         end
+      | eb =>
+        match feval e fct with
+        | Some e' => Some (f_field e' fn) (* RC-FIELD *)
+        | None => None (* Unable to step subexpression of field access *)
+        end
+      end
     | e =>
       match feval e fct with
       | Some e' => Some (f_field e' fn) (* RC-FIELD *)

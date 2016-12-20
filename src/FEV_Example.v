@@ -39,7 +39,8 @@ Definition ct2 : fctable := (
     ))
   :: nil).
 
-Definition myfexp : fexp := f_field (f_apply (f_apply (f_apply (f_new PairC) (f_new D)) (f_new C)) (f_new E)) myThr.
+(* Arguments written in reverse order: last ones towards the inside *)
+Definition myfexp : fexp := f_field (f_apply (f_apply (f_apply (f_new PairC) (f_new E)) (f_new C)) (f_new C)) myThr.
 
 Eval compute in feval myfexp ct2.
 Eval compute in teval myfexp ct2 100.
