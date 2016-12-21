@@ -30,10 +30,8 @@ Definition cname := atom.
 (** The names [this] and [Object] are predefined. We simply assume that these
     names exist. *)
 
-(**Parameter this : var.
-Parameter Object : cname.**)
-Definition this : var := 0.
-Definition Object : cname := 1.
+Parameter this : var.
+Parameter Object : cname.
 
 (** ** Type and term expressions *)
 

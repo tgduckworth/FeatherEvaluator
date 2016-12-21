@@ -208,7 +208,7 @@ Proof.
 intros.
 simpl in |- *.
 rewrite eq_atom_true in |- *.
-(**rewrite eq_atom_true in |- *.**)
+rewrite eq_atom_true in |- *.
 rewrite eq_atom_false in |- *.
 reflexivity.
 auto.

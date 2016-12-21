@@ -20,7 +20,12 @@ Require Peano_dec.
     us to refer to the type [atom] and its properties without having
     to qualify everything with "[AtomImpl.]". *)
 
-(* Module Type ATOM.
+(* I have yet to find a better way to handle a certain problem than by
+   commenting out this module and the type of the AtomImpl module *)
+
+(*
+
+Module Type ATOM.
 
   Parameter atom : Set.
 
@@ -29,12 +34,14 @@ Require Peano_dec.
 
   Parameter eq_atom_dec : forall x y : atom, {x = y} + {x <> y}.
 
-End ATOM. *)
+End ATOM.
+
+*)
 
 (** The implementation of the above interface is hidden for
     documentation purposes. *)
 
-Module AtomImpl.
+Module AtomImpl (* : ATOM *) .
 
   (* begin hide *)
 
